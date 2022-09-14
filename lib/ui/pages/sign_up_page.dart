@@ -35,10 +35,7 @@ class _SignUpPageState extends State<SignUpPage> {
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthFailed) {
-            // showCustomSnackbar(context, state.e);
-            if (kDebugMode) {
-              print('Gagal');
-            }
+            showCustomSnackbar(context, state.e);
           }
 
           if (state is AuthCheckEmailSuccess) {
@@ -117,15 +114,14 @@ class _SignUpPageState extends State<SignUpPage> {
                     CustomFilledButton(
                       title: "Continue",
                       onPressed: () {
-                        Navigator.of(context).pushNamed('/sign-up-set-profile');
-                        // if (validate()) {
-                        // context
-                        //     .read<AuthBloc>()
-                        //     .add(AuthCheckEmail(emailController.text));
-                        // } else {
-                        //   showCustomSnackbar(
-                        //       context, 'Semua field harus diisi!');
-                        // }
+                        if (validate()) {
+                          context
+                              .read<AuthBloc>()
+                              .add(AuthCheckEmail(emailController.text));
+                        } else {
+                          showCustomSnackbar(
+                              context, 'Semua field harus diisi!');
+                        }
                       },
                     ),
                   ],
