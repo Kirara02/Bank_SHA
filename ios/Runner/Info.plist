@@ -48,5 +48,9 @@
 		<string>sms</string>
 		<string>tel</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app required access to the foto liblary</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<key>NSPhotoLibraryUsageDescription</key>
 </dict>
 </plist>

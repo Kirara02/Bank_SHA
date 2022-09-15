@@ -1,3 +1,4 @@
+import 'package:bank_sha/blocs/auth/auth_bloc.dart';
 import 'package:bank_sha/shared/shared_methods.dart';
 import 'package:bank_sha/shared/theme.dart';
 import 'package:bank_sha/ui/widgets/home_latest_transaction_item.dart';
@@ -5,6 +6,7 @@ import 'package:bank_sha/ui/widgets/home_services_item.dart';
 import 'package:bank_sha/ui/widgets/home_tips_item.dart';
 import 'package:bank_sha/ui/widgets/home_user_item.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -99,130 +101,150 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget buildProfile(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: 40),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Howdy,',
-                style: blackTextStyle.copyWith(
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(
-                height: 2,
-              ),
-              Text(
-                'shaynahan',
-                style: blackTextStyle.copyWith(
-                  fontSize: 20,
-                  fontWeight: semiBold,
-                ),
-              )
-            ],
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context).pushNamed('/profile');
-            },
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                  image: AssetImage(
-                    'assets/img_profil.png',
-                  ),
-                ),
-              ),
-              child: Align(
-                alignment: Alignment.topRight,
-                child: Container(
-                  width: 16,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: whiteColor,
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.check_circle,
-                      color: greenColor,
-                      size: 14,
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state is AuthSuccess) {
+          return Container(
+            margin: const EdgeInsets.only(top: 40),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Howdy,',
+                      style: blackTextStyle.copyWith(
+                        fontSize: 16,
+                      ),
                     ),
-                  ),
+                    const SizedBox(
+                      height: 2,
+                    ),
+                    Text(
+                      state.user.name.toString(),
+                      style: blackTextStyle.copyWith(
+                        fontSize: 20,
+                        fontWeight: semiBold,
+                      ),
+                    )
+                  ],
                 ),
-              ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pushNamed('/profile');
+                  },
+                  child: Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: state.user.profilePicture == null
+                            ? const AssetImage(
+                                'assets/img_profil.png',
+                              )
+                            : NetworkImage(
+                                state.user.profilePicture!,
+                              ) as ImageProvider,
+                      ),
+                    ),
+                    child: state.user.verified == 1
+                        ? Align(
+                            alignment: Alignment.topRight,
+                            child: Container(
+                              width: 16,
+                              height: 16,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: whiteColor,
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  Icons.check_circle,
+                                  color: greenColor,
+                                  size: 14,
+                                ),
+                              ),
+                            ),
+                          )
+                        : null,
+                  ),
+                )
+              ],
             ),
-          )
-        ],
-      ),
+          );
+        }
+        return Container();
+      },
     );
   }
 
   Widget buildWalletCard() {
-    return Container(
-      width: double.infinity,
-      height: 220,
-      margin: const EdgeInsets.only(
-        top: 30,
-      ),
-      padding: const EdgeInsets.all(
-        30,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(
-          28,
-        ),
-        image: const DecorationImage(
-          fit: BoxFit.cover,
-          image: AssetImage(
-            'assets/img_bg_card.png',
-          ),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Shayna Hanna',
-            style: whiteTextStyle.copyWith(
-              fontSize: 18,
-              fontWeight: medium,
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if(state is AuthSuccess){
+          return Container(
+            width: double.infinity,
+            height: 220,
+            margin: const EdgeInsets.only(
+              top: 30,
             ),
-          ),
-          const SizedBox(
-            height: 28,
-          ),
-          Text(
-            '**** **** **** 1280',
-            style: whiteTextStyle.copyWith(
-              fontSize: 18,
-              fontWeight: medium,
-              letterSpacing: 9,
+            padding: const EdgeInsets.all(
+              30,
             ),
-          ),
-          const SizedBox(
-            height: 21,
-          ),
-          Text(
-            'Balance',
-            style: whiteTextStyle,
-          ),
-          Text(
-            formatCurrency(12500),
-            style: whiteTextStyle.copyWith(
-              fontSize: 24,
-              fontWeight: semiBold,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(
+                28,
+              ),
+              image: const DecorationImage(
+                fit: BoxFit.cover,
+                image: AssetImage(
+                  'assets/img_bg_card.png',
+                ),
+              ),
             ),
-          ),
-        ],
-      ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  state.user.name.toString(),
+                  style: whiteTextStyle.copyWith(
+                    fontSize: 18,
+                    fontWeight: medium,
+                  ),
+                ),
+                const SizedBox(
+                  height: 28,
+                ),
+                Text(
+                  '**** **** **** ${state.user.cardNumber!.substring(12, 16)}',
+                  style: whiteTextStyle.copyWith(
+                    fontSize: 18,
+                    fontWeight: medium,
+                    letterSpacing: 7,
+                  ),
+                ),
+                const SizedBox(
+                  height: 21,
+                ),
+                Text(
+                  'Balance',
+                  style: whiteTextStyle,
+                ),
+                Text(
+                  formatCurrency(state.user.balance ?? 0),
+                  style: whiteTextStyle.copyWith(
+                    fontSize: 24,
+                    fontWeight: semiBold,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        return Container();
+      },
     );
   }
 
@@ -526,8 +548,8 @@ class MoreDialog extends StatelessWidget {
             ),
             Center(
               child: Wrap(
-                spacing: 30,
-                runSpacing: 25,
+                spacing: 18,
+                runSpacing: 17,
                 children: [
                   HomeServicesItem(
                     title: 'Data',

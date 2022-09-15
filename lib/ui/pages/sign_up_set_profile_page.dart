@@ -1,17 +1,44 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:bank_sha/models/sign_up_form_model.dart';
+import 'package:bank_sha/shared/shared_methods.dart';
+import 'package:bank_sha/ui/pages/sign_up_set_ktp_page.dart';
 import 'package:bank_sha/ui/widgets/forms.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../shared/theme.dart';
 import '../widgets/buttons.dart';
 
 class SignUpSetProfilePage extends StatefulWidget {
-  const SignUpSetProfilePage({Key? key}) : super(key: key);
+  final SignUpFormModel data;
+  const SignUpSetProfilePage({
+    Key? key,
+    required this.data,
+  }) : super(key: key);
 
   @override
-  _SignUpSetProfilePageState createState() => _SignUpSetProfilePageState();
+  State<SignUpSetProfilePage> createState() => _SignUpSetProfilePageState();
 }
 
 class _SignUpSetProfilePageState extends State<SignUpSetProfilePage> {
+  final pinController = TextEditingController(text: '');
+  XFile? selectedImage;
+  bool validateFoto() {
+    if (selectedImage == null) {
+      return false;
+    }
+    return true;
+  }
+
+  bool validate() {
+    if (pinController.text.length != 6) {
+      return false;
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,31 +81,36 @@ class _SignUpSetProfilePageState extends State<SignUpSetProfilePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Container(
-                //   width: 120,
-                //   height: 120,
-                //   decoration: BoxDecoration(
-                //     shape: BoxShape.circle,
-                //     color: lightBackgroundColor,
-                //   ),
-                //   child: Center(
-                //     child: Image.asset(
-                //       'assets/ic_upload.png',
-                //       width: 32,
-                //     ),
-                //   ),
-                // ),
-                Container(
-                  width: 120,
-                  height: 120,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: AssetImage(
-                        'assets/img_profil.png',
-                      ),
+                GestureDetector(
+                  onTap: () async {
+                    final image = await selectImage();
+                    setState(() {
+                      selectedImage = image;
+                    });
+                  },
+                  child: Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: lightBackgroundColor,
+                      image: selectedImage == null
+                          ? null
+                          : DecorationImage(
+                              fit: BoxFit.cover,
+                              image: FileImage(
+                                File(selectedImage!.path),
+                              ),
+                            ),
                     ),
+                    child: selectedImage != null
+                        ? null
+                        : Center(
+                            child: Image.asset(
+                              'assets/ic_upload.png',
+                              width: 32,
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(
@@ -97,6 +129,8 @@ class _SignUpSetProfilePageState extends State<SignUpSetProfilePage> {
                 CustomFormField(
                   title: 'Set PIN (6 digit number)',
                   obscureText: true,
+                  controller: pinController,
+                  keyboardType: TextInputType.number,
                 ),
                 const SizedBox(
                   height: 30,
@@ -104,7 +138,30 @@ class _SignUpSetProfilePageState extends State<SignUpSetProfilePage> {
                 CustomFilledButton(
                   title: "Continue",
                   onPressed: () {
-                    Navigator.of(context).pushNamed('/sign-up-set-ktp');
+                    if (validateFoto()) {
+                      if (validate()) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => SignUpSetKtpPage(
+                              data: widget.data.copyWith(
+                                pin: pinController.text,
+                                profilePicture: selectedImage == null
+                                    ? null
+                                    : 'data:image/png;base64,' +
+                                        base64Encode(
+                                          File(selectedImage!.path)
+                                              .readAsBytesSync(),
+                                        ),
+                              ),
+                            ),
+                          ),
+                        );
+                      } else {
+                        showCustomSnackbar(context, 'PIN harus 6 digit');
+                      }
+                    } else {
+                      showCustomSnackbar(context, 'Foto profil harus diisi');
+                    }
                   },
                 ),
               ],

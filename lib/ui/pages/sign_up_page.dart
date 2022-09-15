@@ -1,6 +1,7 @@
 import 'package:bank_sha/blocs/auth/auth_bloc.dart';
+import 'package:bank_sha/models/sign_up_form_model.dart';
 import 'package:bank_sha/shared/shared_methods.dart';
-import 'package:flutter/foundation.dart';
+import 'package:bank_sha/ui/pages/sign_up_set_profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -29,6 +30,13 @@ class _SignUpPageState extends State<SignUpPage> {
     return true;
   }
 
+  bool validatePass() {
+    if (passwordController.text.length < 6) {
+      return false;
+    } 
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,7 +47,16 @@ class _SignUpPageState extends State<SignUpPage> {
           }
 
           if (state is AuthCheckEmailSuccess) {
-            Navigator.of(context).pushNamed('/sign-up-set-profile');
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => SignUpSetProfilePage(
+                  data: SignUpFormModel(
+                      name: nameController.text,
+                      email: emailController.text,
+                      password: passwordController.text),
+                ),
+              ),
+            );
           }
         },
         builder: (context, state) {
@@ -115,10 +132,14 @@ class _SignUpPageState extends State<SignUpPage> {
                       title: "Continue",
                       onPressed: () {
                         if (validate()) {
-                          context
-                              .read<AuthBloc>()
-                              .add(AuthCheckEmail(emailController.text));
-                        } else {
+                          if (validatePass()) {
+                            context
+                                .read<AuthBloc>()
+                                .add(AuthCheckEmail(emailController.text));
+                          } else{
+                            showCustomSnackbar(context, 'Password minimal 6 karakter');
+                          }
+                        }else {
                           showCustomSnackbar(
                               context, 'Semua field harus diisi!');
                         }
