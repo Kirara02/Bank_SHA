@@ -2,7 +2,7 @@
     package="com.example.bank_sha">
     <uses-permission android:name="android.permission.INTERNET"/>
    <application
-        android:label="bank_sha"
+        android:label="bankSHA"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
